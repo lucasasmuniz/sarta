@@ -1,0 +1,8 @@
+.claude
+
+node_modules
+dist
+
+ARCHITECTURE.md
+PROGRESS.md
+SETUP_GUIDE.md
