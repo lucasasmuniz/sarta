@@ -8,13 +8,12 @@
 	"license": "MIT",
 	"type": "module",
 	"scripts": {
+		"dev": "tsx src/app.ts",
 		"build": "tsc && tsc-alias",
 		"build:watch": "tsc && (concurrently \"tsc -w\" \"tsc-alias -w\")",
 		"typecheck": "tsc --noEmit",
-		"style": "biome format --write",
-		"lint": "biome lint --write",
-		"check": "biome check",
-		"check:fix": "biome check --write",
+		"lint": "biome check",
+		"lint:fix": "biome check --write",
 		"prepare": "husky",
 		"commit": "cz",
 		"test": "vitest run"
@@ -25,7 +24,7 @@
 		}
 	},
 	"lint-staged": {
-		"src/**/*.{ts,json}": "yarn check:fix --no-errors-on-unmatched"
+		"src/**/*.{ts,json}": "yarn lint:fix --no-errors-on-unmatched"
 	},
 	"dependencies": {
 		"argon2": "^0.44.0",
