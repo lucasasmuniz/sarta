@@ -1,0 +1,1 @@
+cd sarta-backend && yarn commitlint --edit $1

@@ -1,0 +1,1 @@
+cd sarta-backend && yarn lint-staged && yarn typecheck
