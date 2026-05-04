@@ -1,0 +1,287 @@
+{
+	"id": "b2437619-9106-409d-83f9-f50d0f46c6bd",
+	"prevId": "00000000-0000-0000-0000-000000000000",
+	"version": "7",
+	"dialect": "postgresql",
+	"tables": {
+		"public.sensors": {
+			"name": "sensors",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "integer",
+					"primaryKey": true,
+					"notNull": true,
+					"identity": {
+						"type": "always",
+						"name": "sensors_id_seq",
+						"schema": "public",
+						"increment": "1",
+						"startWith": "1",
+						"minValue": "1",
+						"maxValue": "2147483647",
+						"cache": "1",
+						"cycle": false
+					}
+				},
+				"sensor_id": {
+					"name": "sensor_id",
+					"type": "varchar(256)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"station_id": {
+					"name": "station_id",
+					"type": "varchar(256)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"sensor_type": {
+					"name": "sensor_type",
+					"type": "sensor_type_enum",
+					"typeSchema": "public",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"unit": {
+					"name": "unit",
+					"type": "varchar",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"created_at": {
+					"name": "created_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "now()"
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {
+				"sensors_station_id_stations_station_id_fk": {
+					"name": "sensors_station_id_stations_station_id_fk",
+					"tableFrom": "sensors",
+					"tableTo": "stations",
+					"columnsFrom": ["station_id"],
+					"columnsTo": ["station_id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {
+				"sensors_sensorId_unique": {
+					"name": "sensors_sensorId_unique",
+					"nullsNotDistinct": false,
+					"columns": ["sensor_id"]
+				}
+			},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"public.stations": {
+			"name": "stations",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "integer",
+					"primaryKey": true,
+					"notNull": true,
+					"identity": {
+						"type": "always",
+						"name": "stations_id_seq",
+						"schema": "public",
+						"increment": "1",
+						"startWith": "1",
+						"minValue": "1",
+						"maxValue": "2147483647",
+						"cache": "1",
+						"cycle": false
+					}
+				},
+				"station_id": {
+					"name": "station_id",
+					"type": "varchar(256)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"name": {
+					"name": "name",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"municipality": {
+					"name": "municipality",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"latitude": {
+					"name": "latitude",
+					"type": "real",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"longitude": {
+					"name": "longitude",
+					"type": "real",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"elevation_m": {
+					"name": "elevation_m",
+					"type": "real",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"created_at": {
+					"name": "created_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "now()"
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {
+				"stations_stationId_unique": {
+					"name": "stations_stationId_unique",
+					"nullsNotDistinct": false,
+					"columns": ["station_id"]
+				}
+			},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"public.telemetry_readings": {
+			"name": "telemetry_readings",
+			"schema": "",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "integer",
+					"primaryKey": true,
+					"notNull": true,
+					"identity": {
+						"type": "always",
+						"name": "telemetry_readings_id_seq",
+						"schema": "public",
+						"increment": "1",
+						"startWith": "1",
+						"minValue": "1",
+						"maxValue": "2147483647",
+						"cache": "1",
+						"cycle": false
+					}
+				},
+				"sensor_id": {
+					"name": "sensor_id",
+					"type": "varchar(256)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"timestamp": {
+					"name": "timestamp",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"ingestion_route": {
+					"name": "ingestion_route",
+					"type": "ingestion_route_enum",
+					"typeSchema": "public",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"value": {
+					"name": "value",
+					"type": "real",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"received_at": {
+					"name": "received_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"created_at": {
+					"name": "created_at",
+					"type": "timestamp with time zone",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "now()"
+				}
+			},
+			"indexes": {
+				"telemetry_readings_timestamp_index": {
+					"name": "telemetry_readings_timestamp_index",
+					"columns": [
+						{
+							"expression": "timestamp",
+							"isExpression": false,
+							"asc": true,
+							"nulls": "last"
+						}
+					],
+					"isUnique": false,
+					"concurrently": false,
+					"method": "btree",
+					"with": {}
+				}
+			},
+			"foreignKeys": {
+				"telemetry_readings_sensor_id_sensors_sensor_id_fk": {
+					"name": "telemetry_readings_sensor_id_sensors_sensor_id_fk",
+					"tableFrom": "telemetry_readings",
+					"tableTo": "sensors",
+					"columnsFrom": ["sensor_id"],
+					"columnsTo": ["sensor_id"],
+					"onDelete": "restrict",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {
+				"telemetry_readings_sensorId_timestamp_unique": {
+					"name": "telemetry_readings_sensorId_timestamp_unique",
+					"nullsNotDistinct": false,
+					"columns": ["sensor_id", "timestamp"]
+				}
+			},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		}
+	},
+	"enums": {
+		"public.ingestion_route_enum": {
+			"name": "ingestion_route_enum",
+			"schema": "public",
+			"values": ["SYNC", "ASYNC"]
+		},
+		"public.sensor_type_enum": {
+			"name": "sensor_type_enum",
+			"schema": "public",
+			"values": ["RAIN", "LEVEL", "TEMPERATURE", "PRESSURE"]
+		}
+	},
+	"schemas": {},
+	"sequences": {},
+	"roles": {},
+	"policies": {},
+	"views": {},
+	"_meta": {
+		"columns": {},
+		"schemas": {},
+		"tables": {}
+	}
+}
