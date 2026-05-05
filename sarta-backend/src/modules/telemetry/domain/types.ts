@@ -20,8 +20,14 @@ export type TelemetryInput = Readonly<{
 	value: number | null;
 }>;
 
-export type TelemetryReading = TelemetryInput &
+export type NewTelemetryReading = TelemetryInput &
 	Readonly<{
 		ingestionRoute: IngestionRoute;
 		receivedAt: Date;
 	}>;
+
+export type TelemetryReadingModel = Readonly<{
+	id: number;
+	createdAt: Date;
+}> &
+	NewTelemetryReading;
