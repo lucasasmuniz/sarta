@@ -1,5 +1,5 @@
-import { telemetryReadings } from "@database/schema.js";
-import { and, eq, gte } from "drizzle-orm";
+import { sensors, telemetryReadings } from "@database/schema.js";
+import { and, count, eq, gte } from "drizzle-orm";
 import type { NodePgDatabase } from "drizzle-orm/node-postgres";
 import type { IngestionRoute, NewTelemetryReading, TelemetryReadingModel } from "../domain/types.js";
 
@@ -40,6 +40,12 @@ export const makeTelemetryRepository = (db: NodePgDatabase) => {
 					),
 				);
 			return result.map((row) => toDomain(row));
+		},
+		//TODO: move to station module when its created
+		sensorExists: async (sensorExternalId: string): Promise<boolean> => {
+			const result = await db.select({ count: count() }).from(sensors).where(eq(sensors.sensorId, sensorExternalId));
+
+			return result.length > 0;
 		},
 	};
 };
