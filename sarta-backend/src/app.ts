@@ -1,3 +1,4 @@
+import { telemetryRoutes } from "@modules/telemetry/routes.js";
 import { env } from "@shared/env.js";
 import fastify from "fastify";
 import { serializerCompiler, validatorCompiler, type ZodTypeProvider } from "fastify-type-provider-zod";
@@ -24,6 +25,8 @@ app.get("/health", {
 		res.send({ status: "ok" });
 	},
 });
+
+app.register(telemetryRoutes, { prefix: "/telemetry" });
 
 (async () => {
 	try {
