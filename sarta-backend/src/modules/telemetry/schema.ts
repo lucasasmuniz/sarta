@@ -22,27 +22,39 @@ const sensorNotFoundErroResponse = z.object({
 });
 
 export const postTelemetrySyncSchema = {
-	body: defaultBodyPostTelemetryRequest,
-	response: {
-		200: z.object({
-			duplicate: z.boolean().describe("Booleano que evidencia duplicação de requisição"),
-		}),
-		422: sensorNotFoundErroResponse,
+	schema: {
+		summary: "Ingestão síncrona de telemetria",
+		description:
+			"Rota para ingestão síncrona de telemetria. Retorna uma resposta imediata indicando se a telemetria é válida ou se é uma duplicata.",
+		tags: ["Telemetria"],
+		body: defaultBodyPostTelemetryRequest,
+		response: {
+			200: z.object({
+				duplicate: z.boolean().describe("Booleano que evidencia duplicação de requisição"),
+			}),
+			422: sensorNotFoundErroResponse,
+		},
 	},
 };
 export const postTelemetryAsyncSchema = {
-	body: defaultBodyPostTelemetryRequest,
-	response: {
-		200: z.object({
-			enqueued: z.literal(false).describe("Booleano que representa se o valor foi enfileirado"),
+	schema: {
+		summary: "Ingestão assíncrona de telemetria",
+		description:
+			"Rota para ingestão assíncrona de telemetria. Retorna uma resposta imediata indicando se a telemetria é válida ou se é uma duplicata.",
+		tags: ["Telemetria"],
+		body: defaultBodyPostTelemetryRequest,
+		response: {
+			200: z.object({
+				enqueued: z.literal(false).describe("Booleano que representa se o valor foi enfileirado"),
 
-			reason: z.string().describe("Razão pelo qual o valor não foi enfileirado"),
-		}),
-		202: z.object({
-			enqueued: z.literal(true).describe("Booleano que representa se o valor foi enfileirado"),
+				reason: z.string().describe("Razão pelo qual o valor não foi enfileirado"),
+			}),
+			202: z.object({
+				enqueued: z.literal(true).describe("Booleano que representa se o valor foi enfileirado"),
 
-			jobId: z.string().describe("Id do job"),
-		}),
-		422: sensorNotFoundErroResponse,
+				jobId: z.string().describe("Id do job"),
+			}),
+			422: sensorNotFoundErroResponse,
+		},
 	},
 };

@@ -8,7 +8,7 @@
 	"license": "MIT",
 	"type": "module",
 	"scripts": {
-		"dev": "tsx src/app.ts",
+		"dev": "tsx --watch src/app.ts",
 		"build": "tsc && tsc-alias",
 		"build:watch": "tsc && (concurrently \"tsc -w\" \"tsc-alias -w\")",
 		"typecheck": "tsc --noEmit",
@@ -30,6 +30,8 @@
 		"src/**/*.{ts,json}": "yarn lint:fix --no-errors-on-unmatched"
 	},
 	"dependencies": {
+		"@fastify/swagger": "^9.7.0",
+		"@fastify/swagger-ui": "^5.2.6",
 		"argon2": "^0.44.0",
 		"bullmq": "^5.76.0",
 		"dotenv": "^17.4.2",

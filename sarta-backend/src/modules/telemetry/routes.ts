@@ -19,14 +19,14 @@ export const telemetryRoutes: FastifyPluginAsyncZod = async (fastify, _opts) => 
 
 	const ingestSyncUseCase = makeIngestSyncUseCase(telemetryRepository, idempotencyStore);
 	const ingestAsyncUseCase = makeIngestAsyncUseCase(telemetryRepository, idempotencyStore, telemetryQueue);
-	fastify.post("/ingest/sync", { schema: postTelemetrySyncSchema }, async (request, reply) => {
+	fastify.post("/ingest/sync", postTelemetrySyncSchema, async (request, reply) => {
 		const telemetryInput = request.body;
 		const syncResponse = await ingestSyncUseCase.execute(telemetryInput, new Date());
 
 		return reply.status(200).send(syncResponse);
 	});
 
-	fastify.post("/ingest/async", { schema: postTelemetryAsyncSchema }, async (request, reply) => {
+	fastify.post("/ingest/async", postTelemetryAsyncSchema, async (request, reply) => {
 		const telemetryInput = request.body;
 		const asyncResponse = await ingestAsyncUseCase.execute(telemetryInput, new Date());
 
