@@ -8,5 +8,8 @@ export const makeIdempotencyStore = (redis: Redis) => {
 			const result = await redis.set(key, "value", "EX", TTL_SECONDS, "NX");
 			return result === "OK";
 		},
+		deleteKey: async (key: string) => {
+			await redis.del(key);
+		},
 	};
 };

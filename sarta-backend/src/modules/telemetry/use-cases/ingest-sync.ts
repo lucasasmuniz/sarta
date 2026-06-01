@@ -10,19 +10,25 @@ export const makeIngestSyncUseCase = (telemetryRepository: TelemetryRepository, 
 			if (!sensorExists) throw new SensorNotFoundError(telemetryInput.sensorId);
 
 			const idempotencyKey = computeIdempotencyKey(telemetryInput.sensorId, telemetryInput.timestamp);
-			const isFirstSeen = await idempotencyStore.checkAndSet(idempotencyKey);
-			if (!isFirstSeen) return { duplicate: true };
 
-			const newTelemetryReading: NewTelemetryReading = {
-				...telemetryInput,
-				ingestionRoute: "SYNC",
-				receivedAt,
-			};
+			try {
+				const isFirstSeen = await idempotencyStore.checkAndSet(idempotencyKey);
+				if (!isFirstSeen) return { duplicate: true };
 
-			const inserted = await telemetryRepository.insertReading(newTelemetryReading);
-			if (!inserted) return { duplicate: true };
+				const newTelemetryReading: NewTelemetryReading = {
+					...telemetryInput,
+					ingestionRoute: "SYNC",
+					receivedAt,
+				};
 
-			return { duplicate: false };
+				const inserted = await telemetryRepository.insertReading(newTelemetryReading);
+				if (!inserted) return { duplicate: true };
+
+				return { duplicate: false };
+			} catch (error) {
+				await idempotencyStore.deleteKey(idempotencyKey);
+				throw error;
+			}
 		},
 	};
 };

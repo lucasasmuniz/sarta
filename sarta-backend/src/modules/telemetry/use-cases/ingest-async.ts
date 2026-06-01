@@ -16,17 +16,22 @@ export const makeIngestAsyncUseCase = (
 			if (!sensorExists) throw new SensorNotFoundError(telemetryInput.sensorId);
 
 			const idempotencyKey = computeIdempotencyKey(telemetryInput.sensorId, telemetryInput.timestamp);
-			const isFirstSeen = await idempotencyStore.checkAndSet(idempotencyKey);
-			if (!isFirstSeen) return { enqueued: false, reason: "duplicate" };
+			try {
+				const isFirstSeen = await idempotencyStore.checkAndSet(idempotencyKey);
+				if (!isFirstSeen) return { enqueued: false, reason: "duplicate" };
 
-			const newTelemetryReading: NewTelemetryReading = {
-				...telemetryInput,
-				ingestionRoute: "ASYNC",
-				receivedAt,
-			};
+				const newTelemetryReading: NewTelemetryReading = {
+					...telemetryInput,
+					ingestionRoute: "ASYNC",
+					receivedAt,
+				};
 
-			await telemetryQueue.queueReading(newTelemetryReading, idempotencyKey);
-			return { enqueued: true, jobId: idempotencyKey };
+				await telemetryQueue.queueReading(newTelemetryReading, idempotencyKey);
+				return { enqueued: true, jobId: idempotencyKey };
+			} catch (error) {
+				await idempotencyStore.deleteKey(idempotencyKey);
+				throw error;
+			}
 		},
 	};
 };
