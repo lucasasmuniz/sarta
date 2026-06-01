@@ -15,7 +15,7 @@ export const telemetryRoutes: FastifyPluginAsyncZod = async (fastify, _opts) => 
 	const telemetryRepository = makeTelemetryRepository(db);
 	const idempotencyStore = makeIdempotencyStore(redis);
 	const telemetryQueue = makeTelemetryQueue(redis);
-	const telemetryWorker = makeTelemetryWorker(redis, telemetryRepository);
+	const telemetryWorker = makeTelemetryWorker(redis, telemetryRepository, fastify.log);
 
 	const ingestSyncUseCase = makeIngestSyncUseCase(telemetryRepository, idempotencyStore);
 	const ingestAsyncUseCase = makeIngestAsyncUseCase(telemetryRepository, idempotencyStore, telemetryQueue);
