@@ -45,7 +45,7 @@ export const makeTelemetryRepository = (db: NodePgDatabase) => {
 		sensorExists: async (sensorExternalId: string): Promise<boolean> => {
 			const result = await db.select({ count: count() }).from(sensors).where(eq(sensors.sensorId, sensorExternalId));
 
-			return result.length > 0;
+			return (result[0]?.count ?? 0) > 0;
 		},
 	};
 };
