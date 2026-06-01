@@ -1,7 +1,7 @@
 import { SENSOR_TYPES, type SensorType } from "../types.js";
 
 export const computeIdempotencyKey = (sensorId: string, timestamp: Date): string => {
-	return `${sensorId}:${timestamp.toISOString()}`;
+	return `${sensorId}_${timestamp.toISOString()}`;
 };
 
 const MAX_TEMPERATURE_C = 60;

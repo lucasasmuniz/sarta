@@ -6,7 +6,7 @@ describe("TelemetryService", () => {
 		it("should compute the correct idempotency key", () => {
 			const sensorId = "sensor123";
 			const timestamp = new Date("2024-01-01T00:00:00Z");
-			const expectedKey = "sensor123:2024-01-01T00:00:00.000Z";
+			const expectedKey = "sensor123_2024-01-01T00:00:00.000Z";
 
 			const result = computeIdempotencyKey(sensorId, timestamp);
 			expect(result).toBe(expectedKey);
