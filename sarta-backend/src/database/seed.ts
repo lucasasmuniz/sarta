@@ -1,74 +1,67 @@
+import { SENSOR_TYPES, type SensorType } from "@modules/telemetry/domain/types.js";
 import { sql } from "drizzle-orm";
 import { db } from "./index.js";
 import { sensors, stations } from "./schema.js";
 
-await db.transaction(async (tx) => {
-	const newStations = await tx
-		.insert(stations)
-		.values([
-			{
-				name: "Estação 001",
-				stationId: "STN-001",
-				elevationM: 2,
-				latitude: -8.684,
-				longitude: -35.591,
-				municipality: "Palmares",
-			},
-			{
-				name: "Estação 002",
-				stationId: "STN-002",
-				elevationM: 1,
-				latitude: -8.707,
-				longitude: -35.532,
-				municipality: "Catende",
-			},
-			{
-				name: "Estação 003",
-				stationId: "STN-003",
-				elevationM: 2.4,
-				latitude: -8.945,
-				longitude: -35.289,
-				municipality: "Barreiros",
-			},
-			{
-				name: "Estação 004",
-				stationId: "STN-004",
-				elevationM: 1.3,
-				latitude: -8.782,
-				longitude: -35.973,
-				municipality: "São Bento do Una",
-			},
-		])
-		.onConflictDoUpdate({
-			target: stations.stationId,
-			set: {
-				name: sql`excluded.name`,
-				elevationM: sql`excluded.elevation_m`,
-				latitude: sql`excluded.latitude`,
-				longitude: sql`excluded.longitude`,
-				municipality: sql`excluded.municipality`,
-			},
-		})
-		.returning({ stationId: stations.stationId });
+const sensorUnitRecord: Record<SensorType, string> = {
+	RAIN: "mm",
+	LEVEL: "m",
+	TEMPERATURE: "°C",
+	PRESSURE: "hPa",
+};
 
-	for (const station of newStations) {
-		const stationNumber = station.stationId.split("-")[1] || "000";
+await db.transaction(async (tx) => {
+	for (let i = 0; i < 500; i++) {
+		const stationNumber = String(i + 1).padStart(3, "0");
+		const stationId = `STN-${stationNumber}`;
+
+		await tx
+			.insert(stations)
+			.values({
+				name: `Estação ${stationNumber}`,
+				stationId,
+				elevationM: 1 + i * 0.1,
+				latitude: -8.0 + i ** 0.25,
+				longitude: -35.0 + i ** 0.5,
+				municipality: `Municipio ${stationNumber}`,
+			})
+			.onConflictDoUpdate({
+				target: stations.stationId,
+				set: {
+					name: sql`excluded.name`,
+					elevationM: sql`excluded.elevation_m`,
+					latitude: sql`excluded.latitude`,
+					longitude: sql`excluded.longitude`,
+					municipality: sql`excluded.municipality`,
+				},
+			});
+
 		await tx
 			.insert(sensors)
 			.values([
-				{ sensorId: `SNS-${stationNumber}-RAIN`, stationId: station.stationId, sensorType: "RAIN", unit: "mm" },
-				{ sensorId: `SNS-${stationNumber}-LEVEL`, stationId: station.stationId, sensorType: "LEVEL", unit: "m" },
 				{
-					sensorId: `SNS-${stationNumber}-TEMPERATURE`,
-					stationId: station.stationId,
-					sensorType: "TEMPERATURE",
-					unit: "°C",
+					sensorId: `SNS-${stationNumber}-${SENSOR_TYPES.RAIN}`,
+					stationId,
+					sensorType: SENSOR_TYPES.RAIN,
+					unit: sensorUnitRecord[SENSOR_TYPES.RAIN],
 				},
 				{
-					sensorId: `SNS-${stationNumber}-PRESSURE`,
-					stationId: station.stationId,
-					sensorType: "PRESSURE",
-					unit: "hPa",
+					sensorId: `SNS-${stationNumber}-${SENSOR_TYPES.LEVEL}`,
+					stationId,
+					sensorType: SENSOR_TYPES.LEVEL,
+					unit: sensorUnitRecord[SENSOR_TYPES.LEVEL],
+				},
+				{
+					sensorId: `SNS-${stationNumber}-${SENSOR_TYPES.TEMPERATURE}`,
+					stationId,
+					sensorType: SENSOR_TYPES.TEMPERATURE,
+					unit: sensorUnitRecord[SENSOR_TYPES.TEMPERATURE],
+				},
+				{
+					sensorId: `SNS-${stationNumber}-${SENSOR_TYPES.PRESSURE}`,
+					stationId,
+					sensorType: SENSOR_TYPES.PRESSURE,
+					unit: sensorUnitRecord[SENSOR_TYPES.PRESSURE],
 				},
 			])
 			.onConflictDoUpdate({
