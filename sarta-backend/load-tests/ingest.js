@@ -1,4 +1,15 @@
 import http from 'k6/http';
+import exec from 'k6/execution';
+import { check } from 'k6';
+import { Counter } from 'k6/metrics';
+
+
+const REGISTRED_STATIONS = 500;
+const SENSORS_PER_STATION = 4;
+const REGISTRED_SENSORS = REGISTRED_STATIONS * SENSORS_PER_STATION;
+
+const BASE_DATETIME = new Date('2026-06-03T00:00:00.000Z');
+const TIME_PER_READING = 600000; // 10 minutes in milliseconds
 
 const scenarioLookUp = {
     'C1': 2000,
@@ -7,6 +18,8 @@ const scenarioLookUp = {
     'C4': 24000,
     'C5': 48000,
 };
+
+const sensorTypes = ['RAIN', 'LEVEL', 'TEMPERATURE', 'PRESSURE'];
 
 const validRoutes = ['sync', 'async'];
 
@@ -24,6 +37,9 @@ if(!(validRoutes.includes(routeValue))) {
 
 
 export const options = {
+    thresholds: {
+        'http_reqs{status:400}': ['count>=0'],
+    },
     scenarios: {
         burst: {
             executor: 'constant-arrival-rate',
@@ -36,13 +52,34 @@ export const options = {
     }
 };
 
+const status422Counter = new Counter('status_422');
+
 export default function () {
+    const iteration = exec.scenario.iterationInTest;
+    const sensor = iteration % REGISTRED_SENSORS;
+    const reading = Math.floor(iteration / REGISTRED_SENSORS);
+
+    const sensorType = sensorTypes[sensor % sensorTypes.length];
+    const stationId = (Math.floor(sensor / SENSORS_PER_STATION) + 1).toString().padStart(3, '0');
+
+    const timestamp = new Date(BASE_DATETIME.getTime() + reading * TIME_PER_READING).toISOString();
+    
+    const randomValue = iteration % 200 === 0 ? null : iteration * 0.1 / (sensor + 1);
+
     const route = `http://localhost:3000/telemetry/ingest/${routeValue}`;
-    http.post(route, JSON.stringify({
-        sensorId: "string",
-        timestamp: "2026-06-03T03:04:38.930Z",
-        value: 0
+    const res = http.post(route, JSON.stringify({
+        sensorId: `SNS-${stationId}-${sensorType}`,
+        timestamp: timestamp,
+        value: randomValue
     }), {
         headers: { 'Content-Type': 'application/json' },
+    });
+
+    if(res.status === 422){
+        status422Counter.add(1);
+    };
+
+    check(res , {
+        'is status 200 or 202': (r) => r.status === 200 || r.status === 202,
     });
 };
