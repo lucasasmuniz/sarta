@@ -46,8 +46,10 @@ export const options = {
             rate: total, 
             timeUnit: '15s',
             duration: '15s',
-            preAllocatedVUs: 1,
-            maxVUs: 1,
+            // TODO: por ora fixo (dimensionado pro pior caso, sync/C5). Depois derivar
+            // do `total` no init (como a rate) pra não sobrar VU ocioso nos cenários leves.
+            preAllocatedVUs: 60,
+            maxVUs: 60,
         }
     }
 };
