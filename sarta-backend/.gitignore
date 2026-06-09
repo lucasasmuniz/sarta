@@ -4,3 +4,15 @@ SETUP_GUIDE.md
 
 src/modules/telemetry/TELEMETRY_GUIDE.md
 src/modules/telemetry/WORKERS_STUDY.md
+src/modules/telemetry/FUNCTIONAL_STUDY.md
+
+load-tests/K6_STUDY.md
+load-tests/LATENCY_QUERY_STUDY.md
+
+src/Monografia*
+
+RESULTS_HANDOFF.md
+TCC_CONTEXT.md
+EXPERIMENT_FINDINGS.md
+
+load-tests/summaries/
