@@ -1,7 +1,8 @@
 import http from 'k6/http';
 import exec from 'k6/execution';
 import { check } from 'k6';
-import { Counter } from 'k6/metrics';
+import { Counter, Trend, Rate } from 'k6/metrics';
+import { textSummary } from 'https://jslib.k6.io/k6-summary/0.0.2/index.js';
 
 
 const REGISTRED_STATIONS = 500;
@@ -25,6 +26,7 @@ const validRoutes = ['sync', 'async'];
 
 const scenarioValue = __ENV.SCENARIO;
 const routeValue = __ENV.ROUTE;
+const SUMMARIES_PATH = __ENV.SUMMARIES_PATH ?? './load-tests/summaries';
 
 if(!(scenarioValue in scenarioLookUp)) {
     throw new Error(`Invalid scenario: ${scenarioValue}. Valid scenarios are C1, C2, C3, C4, C5.`);
@@ -35,11 +37,11 @@ if(!(validRoutes.includes(routeValue))) {
     throw new Error(`Invalid route: ${routeValue}. Valid routes are sync, async.`);
 }
 
-
 export const options = {
     thresholds: {
         'http_reqs{status:400}': ['count>=0'],
     },
+    summaryTrendStats: ['avg', 'min', 'med', 'max', 'p(90)', 'p(95)', 'p(99)', 'count'],
     scenarios: {
         burst: {
             executor: 'constant-arrival-rate',
@@ -55,6 +57,10 @@ export const options = {
 };
 
 const status422Counter = new Counter('status_422');
+
+const steadyLatency = new Trend('steadyLatency')
+
+const serverErrorRate = new Rate('server_error_rate')
 
 export default function () {
     const iteration = exec.scenario.iterationInTest;
@@ -79,9 +85,37 @@ export default function () {
 
     if(res.status === 422){
         status422Counter.add(1);
-    };
+    }
+    
+    if(iteration > total/10){
+        serverErrorRate.add(res.status >= 500)
+        steadyLatency.add(res.timings.duration);
+    }
 
     check(res , {
         'is status 200 or 202': (r) => r.status === 200 || r.status === 202,
     });
 };
+
+export function handleSummary(data){
+    const metrics = data.metrics;
+    return {
+        [`${SUMMARIES_PATH}/summary-${routeValue}-${scenarioValue}.json`]: JSON.stringify({
+            route: routeValue,
+            scenario: scenarioValue,
+            http_med: metrics.steadyLatency.values.med,
+            http_p95: metrics.steadyLatency.values["p(95)"],
+            http_p99: metrics.steadyLatency.values["p(99)"],
+            http_max: metrics.steadyLatency.values.max,
+            http_avg: metrics.steadyLatency.values.avg,
+            throughput_rps: metrics.http_reqs.values.rate,
+            server_error_rate: metrics.server_error_rate.values.rate,
+            http_failed_rate: metrics.http_req_failed.values.rate,
+            status_422: metrics.status_422?.values?.count ?? 0,
+            dropped: metrics.dropped_iterations?.values?.count ?? 0,
+            iterations: metrics.iterations.values.count,
+            test_duration_ms: data.state.testRunDurationMs,
+        }, null, 2),
+        stdout: textSummary(data, { indent: ' ', enableColors: true }),
+    };
+}
