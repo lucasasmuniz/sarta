@@ -1,0 +1,16 @@
+{
+	"route": "async",
+	"scenario": "C2",
+	"http_med": 1.85616,
+	"http_p95": 2.66032715,
+	"http_p99": 3.511317490000002,
+	"http_max": 9.960468,
+	"http_avg": 1.9562715988888901,
+	"throughput_rps": 400.02309191125096,
+	"server_error_rate": 0,
+	"http_failed_rate": 0,
+	"status_422": 0,
+	"dropped": 0,
+	"iterations": 6001,
+	"test_duration_ms": 15001.633959
+}

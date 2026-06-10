@@ -1,0 +1,16 @@
+{
+	"route": "sync",
+	"scenario": "C1",
+	"http_med": 7.035483,
+	"http_p95": 54.048396999999994,
+	"http_p99": 73.63161351,
+	"http_max": 117.025231,
+	"http_avg": 12.294367736111116,
+	"throughput_rps": 133.3646864358065,
+	"server_error_rate": 0,
+	"http_failed_rate": 0,
+	"status_422": 0,
+	"dropped": 0,
+	"iterations": 2001,
+	"test_duration_ms": 15003.971842
+}
